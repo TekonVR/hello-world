@@ -9,7 +9,7 @@
 const CACHE = 'lockin-v1';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(['/', '/index.html'])));
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(['./', './index.html'])));
   self.skipWaiting();
 });
 
@@ -34,7 +34,7 @@ self.addEventListener('fetch', (event) => {
           if (response.ok) cache.put(request, response.clone());
           return response;
         })
-        .catch(() => cached ?? caches.match('/index.html'));
+        .catch(() => cached ?? caches.match('./index.html'));
 
       return cached ?? network;
     }),

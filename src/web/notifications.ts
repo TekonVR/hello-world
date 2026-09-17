@@ -81,7 +81,7 @@ export function maybeNudge(options: {
 
   try {
     if (!('Notification' in window) || Notification.permission !== 'granted') return false;
-    new Notification('Lock In', { body: nudgeBody(options.topicName), icon: '/icon-192.png' });
+    new Notification('Lock In', { body: nudgeBody(options.topicName), icon: './icon-192.png' });
     markNudged(now);
     return true;
   } catch {

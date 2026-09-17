@@ -19,7 +19,7 @@ createRoot(container).render(
 // Offline support, so a sprint survives a patchy connection on the bus home.
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
       // No service worker: the app still works, it just needs the network.
     });
   });
