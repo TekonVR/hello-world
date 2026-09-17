@@ -1,0 +1,29 @@
+{
+  "name": "lock-in",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lock In: a focus-first GCSE revision app for Year 10 and Year 11",
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173",
+    "icons": "node scripts/make-icons.mjs",
+    "pretest": "rm -rf .test-build",
+    "test": "tsc -p tsconfig.test.json && node --test \".test-build/test/*.test.js\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "@types/react": "~19.2.0",
+    "@types/react-dom": "~19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "~5.9.2",
+    "vite": "^7.3.6"
+  }
+}
