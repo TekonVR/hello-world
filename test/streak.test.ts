@@ -91,6 +91,12 @@ test('records are personal bests across the whole history', () => {
   assert.equal(records.subjectsTouched, 1);
 });
 
+test('a sprint served for under a minute still counts as a minute', () => {
+  const short = sprint(NOW - 30_000);
+  short.endedAt = short.startedAt + 40_000;
+  assert.equal(personalRecords([short]).totalMinutes, 1);
+});
+
 test('records on an empty history are zeroes, not minus infinity', () => {
   const records = personalRecords([]);
   assert.equal(records.bestWeek, 0);

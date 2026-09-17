@@ -28,7 +28,7 @@ export interface AnalyticsEvent {
 type Sink = (event: AnalyticsEvent) => void;
 
 let sink: Sink = (event) => {
-  if (__DEV__) console.log(`[analytics] ${event.name}`, event.props);
+  if (import.meta.env?.DEV) console.log(`[analytics] ${event.name}`, event.props);
 };
 
 export function setAnalyticsSink(next: Sink): void {

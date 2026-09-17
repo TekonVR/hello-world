@@ -1,18 +1,19 @@
 /**
- * App state: one store, persisted to the device, read through a hook.
+ * App state: one store, persisted to localStorage, read through a hook.
  *
  * Small enough not to need a state library, and keeping it in one place means
  * the sprint screen cannot get out of step with the progress screen.
+ *
+ * The records match what the Postgres schema in section 10 will hold, so
+ * adding a backend later is a transport problem rather than a remodelling one.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -36,47 +37,37 @@ interface StoreValue {
 
 const StoreContext = createContext<StoreValue | null>(null);
 
+function read(): AppState {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return migrate(raw ? JSON.parse(raw) : null);
+  } catch {
+    // Private mode, blocked storage or a corrupt save: start fresh rather than
+    // refuse to open.
+    return defaultState();
+  }
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(defaultState);
   const [hydrated, setHydrated] = useState(false);
-  const saving = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
-    let cancelled = false;
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => {
-        if (cancelled) return;
-        setState(migrate(raw ? JSON.parse(raw) : null));
-      })
-      .catch(() => {
-        // Unreadable save: start fresh rather than refuse to open.
-      })
-      .finally(() => {
-        if (!cancelled) setHydrated(true);
-      });
-    return () => {
-      cancelled = true;
-    };
+    setState(read());
+    setHydrated(true);
   }, []);
 
-  const persist = useCallback((next: AppState) => {
-    saving.current = saving.current
-      .then(() => AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)))
-      .catch(() => {
-        // Full disk or private mode: the session still works from memory.
-      });
+  const apply = useCallback((updater: (current: AppState) => AppState) => {
+    setState((current) => {
+      const next = updater(current);
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // Full quota or blocked storage: this session still works from memory.
+      }
+      return next;
+    });
   }, []);
-
-  const apply = useCallback(
-    (updater: (current: AppState) => AppState) => {
-      setState((current) => {
-        const next = updater(current);
-        persist(next);
-        return next;
-      });
-    },
-    [persist],
-  );
 
   const value = useMemo<StoreValue>(
     () => ({
@@ -89,7 +80,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       updateProfile: (patch) =>
         apply((current) => ({ ...current, profile: { ...current.profile, ...patch } })),
 
-      startSprint: (sprint) => apply((current) => ({ ...current, sprints: [...current.sprints, sprint] })),
+      startSprint: (sprint) =>
+        apply((current) => ({ ...current, sprints: [...current.sprints, sprint] })),
 
       recordMove: (sprintId, result) =>
         apply((current) => ({
@@ -111,7 +103,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (!sprint || sprint.endedAt !== null) return current;
 
           const finished: Sprint = { ...sprint, status, endedAt };
-          const before: TopicState = current.topicStates[sprint.topicId] ?? emptyTopicState(sprint.topicId);
+          const before: TopicState =
+            current.topicStates[sprint.topicId] ?? emptyTopicState(sprint.topicId);
           // An abandoned sprint still teaches the engine what was answered.
           const after = applySprint(before, finished.results, endedAt);
 
@@ -126,7 +119,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         apply((current) => ({ ...current, events: [...current.events, event].slice(-200) })),
 
       reset: () => {
-        AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+        } catch {
+          // The in-memory reset below is what the student sees either way.
+        }
         setState(defaultState());
       },
     }),

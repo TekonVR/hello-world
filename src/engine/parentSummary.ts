@@ -42,7 +42,8 @@ export function buildParentSummary(options: {
   );
 
   const minutes = thisWeek.reduce(
-    (total, sprint) => total + Math.round(((sprint.endedAt ?? sprint.startedAt) - sprint.startedAt) / 60_000),
+    (total, sprint) =>
+      total + Math.ceil(((sprint.endedAt ?? sprint.startedAt) - sprint.startedAt) / 60_000),
     0,
   );
   const covered = [...new Set(thisWeek.map((sprint) => sprint.subjectId))].map(subjectName);

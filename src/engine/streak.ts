@@ -73,7 +73,8 @@ export function personalRecords(sprints: Sprint[]): PersonalRecords {
     perWeek.set(week, (perWeek.get(week) ?? 0) + 1);
     perDay.set(day, (perDay.get(day) ?? 0) + 1);
     subjects.add(sprint.subjectId);
-    totalMinutes += Math.round(((sprint.endedAt ?? sprint.startedAt) - sprint.startedAt) / MS_PER_MINUTE);
+    // Rounded up: any time served is at least a minute, never "0 minutes".
+    totalMinutes += Math.ceil(((sprint.endedAt ?? sprint.startedAt) - sprint.startedAt) / MS_PER_MINUTE);
   }
 
   return {

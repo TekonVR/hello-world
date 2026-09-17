@@ -1,0 +1,17 @@
+{
+  "name": "Lock In",
+  "short_name": "Lock In",
+  "description": "A focus-first GCSE revision app for Year 10 and Year 11.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0C0F14",
+  "theme_color": "#0C0F14",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
